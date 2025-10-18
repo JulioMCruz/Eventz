@@ -2,8 +2,10 @@
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
+import { useAccount } from "wagmi"
 import { getEvents, type RedirectConfig } from "@/lib/config"
 import { logout } from "@/lib/auth"
+import { isAdminWallet } from "@/lib/admin-check"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -15,11 +17,29 @@ export default function DashboardPage() {
   const [events, setEvents] = useState<RedirectConfig[]>([])
   const [loading, setLoading] = useState(true)
   const router = useRouter()
+  const { address, isConnected } = useAccount()
+  const isAdmin = isAdminWallet(address)
 
   useEffect(() => {
-    setEvents(getEvents())
-    setLoading(false)
-  }, [])
+    // Check if user is authenticated
+    if (!isConnected) {
+      router.push("/login")
+      return
+    }
+
+    const loadEvents = async () => {
+      try {
+        const eventsData = await getEvents()
+        setEvents(eventsData)
+      } catch (error) {
+        console.error("Error loading events:", error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadEvents()
+  }, [isConnected, router])
 
   const handleLogout = () => {
     logout()
@@ -51,9 +71,11 @@ export default function DashboardPage() {
               <Link href="/events" className="text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors">
                 Events
               </Link>
-              <Link href="/admin" className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">
-                Admin
-              </Link>
+              {isAdmin && (
+                <Link href="/admin" className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">
+                  Admin
+                </Link>
+              )}
               <Button
                 variant="ghost"
                 size="sm"
