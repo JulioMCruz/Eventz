@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Clear Auth</title>
+</head>
+<body>
+    <h1>Clearing authentication...</h1>
+    <script>
+        localStorage.removeItem('eventz_wallet_auth');
+        localStorage.removeItem('eventz_wallet_user');
+        alert('Auth cleared! You can now close this tab and go back to /login');
+    </script>
+</body>
+</html>

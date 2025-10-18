@@ -3,9 +3,11 @@
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
+import { useAccount } from "wagmi"
 import { isAuthenticated, logout } from "@/lib/auth"
+import { isAdminWallet } from "@/lib/admin-check"
 import { Button } from "@/components/ui/button"
-import { Settings, LogOut, Calendar, Users } from "lucide-react"
+import { Settings, LogOut, Calendar, Users, AlertCircle } from "lucide-react"
 import Link from "next/link"
 import { EventsManager } from "@/components/admin/events-manager"
 import { UsersManager } from "@/components/admin/users-manager"
@@ -13,14 +15,19 @@ import { UsersManager } from "@/components/admin/users-manager"
 export default function AdminPage() {
   const router = useRouter()
   const [isChecking, setIsChecking] = useState(true)
+  const { address, isConnected } = useAccount()
+  const isAdmin = isAdminWallet(address)
 
   useEffect(() => {
     if (!isAuthenticated()) {
       router.push("/login")
+    } else if (isConnected && !isAdmin) {
+      // User is authenticated but not an admin
+      setIsChecking(false)
     } else {
       setIsChecking(false)
     }
-  }, [router])
+  }, [router, isConnected, isAdmin])
 
   const handleLogout = () => {
     logout()
@@ -33,6 +40,31 @@ export default function AdminPage() {
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
           <p className="mt-4 text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Show access denied for non-admin users
+  if (isConnected && !isAdmin) {
+    return (
+      <div className="min-h-screen bg-muted/30 flex items-center justify-center p-4">
+        <div className="max-w-md w-full bg-background rounded-lg shadow-lg p-8 text-center">
+          <AlertCircle className="h-16 w-16 text-destructive mx-auto mb-4" />
+          <h1 className="text-2xl font-bold mb-2">Access Denied</h1>
+          <p className="text-muted-foreground mb-6">
+            You don't have permission to access the admin dashboard. Only authorized admin wallets can access this area.
+          </p>
+          <div className="space-y-2">
+            <Button onClick={() => router.push("/events")} className="w-full">
+              <Calendar className="mr-2 h-4 w-4" />
+              Go to Events
+            </Button>
+            <Button onClick={handleLogout} variant="outline" className="w-full">
+              <LogOut className="mr-2 h-4 w-4" />
+              Logout
+            </Button>
+          </div>
         </div>
       </div>
     )
