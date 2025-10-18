@@ -8,8 +8,25 @@ const _geist = Geist({ subsets: ["latin"] });
 const _geistMono = Geist_Mono({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: 'Eventz - Event Redirect Platform',
-  description: 'Event redirect platform with Web3 authentication',
+  title: 'Eventz - The Solution to Manage Your Events',
+  description: 'Professional event management platform with customizable landing pages, automated redirects, and seamless attendee experience. Create, manage, and track your events effortlessly.',
+  keywords: ['event management', 'event platform', 'event redirect', 'landing pages', 'event marketing', 'event registration', 'event tracking'],
+  authors: [{ name: 'Eventz' }],
+  openGraph: {
+    title: 'Eventz - The Solution to Manage Your Events',
+    description: 'Professional event management platform with customizable landing pages and automated redirects.',
+    type: 'website',
+    locale: 'en_US',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Eventz - The Solution to Manage Your Events',
+    description: 'Professional event management platform with customizable landing pages and automated redirects.',
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
   generator: 'v0.app',
 }
 
