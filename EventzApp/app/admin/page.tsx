@@ -3,8 +3,7 @@
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { useAccount } from "wagmi"
-import { isAuthenticated, logout } from "@/lib/auth"
+import { useAccount, useDisconnect } from "wagmi"
 import { isAdminWallet } from "@/lib/admin-check"
 import { Button } from "@/components/ui/button"
 import { Settings, LogOut, Calendar, Users, AlertCircle } from "lucide-react"
@@ -16,21 +15,28 @@ export default function AdminPage() {
   const router = useRouter()
   const [isChecking, setIsChecking] = useState(true)
   const { address, isConnected } = useAccount()
+  const { disconnect } = useDisconnect()
   const isAdmin = isAdminWallet(address)
 
   useEffect(() => {
-    if (!isAuthenticated()) {
+    // Check if wallet is connected
+    if (!isConnected) {
       router.push("/login")
-    } else if (isConnected && !isAdmin) {
-      // User is authenticated but not an admin
-      setIsChecking(false)
-    } else {
-      setIsChecking(false)
+      return
     }
+
+    // Check if connected wallet is admin
+    if (!isAdmin) {
+      setIsChecking(false)
+      return
+    }
+
+    // User is connected and is admin
+    setIsChecking(false)
   }, [router, isConnected, isAdmin])
 
   const handleLogout = () => {
-    logout()
+    disconnect()
     router.push("/")
   }
 

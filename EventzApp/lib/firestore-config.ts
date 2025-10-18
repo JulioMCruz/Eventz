@@ -132,6 +132,11 @@ export async function createEventInFirestore(
  */
 export async function updateEventInFirestore(id: string, updates: Partial<RedirectConfig>): Promise<void> {
   try {
+    // Prevent updating the default fallback event
+    if (id === "default") {
+      throw new Error("Cannot update the default fallback event. Please create a new event instead.")
+    }
+
     // If setting as default, unset all others
     if (updates.isDefault) {
       await unsetAllDefaultEvents()
@@ -153,6 +158,11 @@ export async function updateEventInFirestore(id: string, updates: Partial<Redire
  */
 export async function deleteEventFromFirestore(id: string): Promise<void> {
   try {
+    // Prevent deleting the default fallback event
+    if (id === "default") {
+      throw new Error("Cannot delete the default fallback event.")
+    }
+
     const docRef = doc(db, EVENTS_COLLECTION, id)
     const docSnap = await getDoc(docRef)
 

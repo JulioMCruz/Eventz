@@ -12,12 +12,16 @@ export default function Home() {
   const [countdown, setCountdown] = useState<number | null>(null)
 
   useEffect(() => {
-    const loadedConfig = getDefaultEvent()
-    setConfig(loadedConfig)
+    const loadConfig = async () => {
+      const loadedConfig = await getDefaultEvent()
+      setConfig(loadedConfig)
 
-    if (loadedConfig.redirectMode === "auto") {
-      setCountdown(loadedConfig.autoRedirectDelay)
+      if (loadedConfig.redirectMode === "auto") {
+        setCountdown(loadedConfig.autoRedirectDelay)
+      }
     }
+
+    loadConfig()
   }, [])
 
   useEffect(() => {
@@ -64,22 +68,22 @@ export default function Home() {
         <span className="hidden sm:inline">Login</span>
       </Link>
 
-      <div className="w-full max-w-7xl">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
+      <div className="w-full max-w-[90rem]">
+        <div className="grid lg:grid-cols-[1.2fr,1fr] gap-8 lg:gap-16 items-center">
           {/* Left side - Image */}
-          <div className="relative aspect-[4/3] rounded-2xl overflow-hidden shadow-2xl">
-            <Image src={config.heroImage || "/placeholder.svg"} alt="Hero" fill className="object-cover" priority />
+          <div className="relative aspect-[4/3] rounded-lg overflow-hidden">
+            <Image src={config.heroImage || "/placeholder.svg"} alt="Hero" fill className="object-contain" priority />
           </div>
 
           {/* Right side - Content */}
           <div className="space-y-6">
-            <div className="inline-block px-4 py-2 bg-primary/10 text-primary rounded-full text-sm font-medium">
+            <div className="inline-block px-4 py-2 bg-primary/10 text-primary rounded-full text-base font-medium">
               {config.heroSlogan}
             </div>
 
-            <h1 className="text-5xl lg:text-6xl font-bold text-balance leading-tight">{config.heroTitle}</h1>
+            <h1 className="text-4xl lg:text-5xl font-bold text-balance leading-tight">{config.heroTitle}</h1>
 
-            <p className="text-xl text-muted-foreground text-pretty leading-relaxed">{config.heroText}</p>
+            <p className="text-lg lg:text-xl text-muted-foreground text-pretty leading-relaxed">{config.heroText}</p>
 
             <div className="pt-4">
               {config.redirectMode === "auto" && countdown !== null ? (
