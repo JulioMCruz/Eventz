@@ -1,0 +1,22 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Development rules - ALLOW ALL ACCESS
+    // WARNING: Replace with proper security rules before production!
+
+    match /{allPaths=**} {
+      allow read, write: if true;
+    }
+
+    // Production rules (commented out):
+    // match /events/{eventId}/{fileName} {
+    //   // Anyone can read event images
+    //   allow read: true;
+    //
+    //   // Only authenticated admins can upload/delete event images
+    //   allow write, delete: if request.auth != null &&
+    //                            firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    // }
+  }
+}

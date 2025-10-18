@@ -1,0 +1,40 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Development rules - ALLOW ALL ACCESS
+    // WARNING: Replace with proper security rules before production!
+
+    match /{document=**} {
+      allow read, write: if true;
+    }
+
+    // Production rules (commented out):
+    // match /users/{userId} {
+    //   // Allow users to read their own document
+    //   allow read: if request.auth != null &&
+    //                  request.auth.token.walletAddress.lower() == resource.data.walletAddress.lower();
+    //
+    //   // Allow creating new user if authenticated
+    //   allow create: if request.auth != null;
+    //
+    //   // Allow users to update their own document (except role)
+    //   allow update: if request.auth != null &&
+    //                    request.auth.token.walletAddress.lower() == resource.data.walletAddress.lower() &&
+    //                    request.resource.data.role == resource.data.role;
+    //
+    //   // Only admins can delete users
+    //   allow delete: if request.auth != null &&
+    //                    get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    // }
+    //
+    // match /events/{eventId} {
+    //   // Anyone can read events
+    //   allow read: true;
+    //
+    //   // Only admins can create, update, or delete events
+    //   allow create, update, delete: if request.auth != null &&
+    //                                    get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    // }
+  }
+}
