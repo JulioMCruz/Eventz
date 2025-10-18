@@ -57,7 +57,7 @@ export default function Home() {
   return (
     <main className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-background via-background to-muted/20">
       <Link
-        href="/admin/login"
+        href="/login"
         className="fixed top-6 right-6 z-50 flex items-center gap-2 px-4 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors rounded-lg hover:bg-muted/50"
       >
         <LogIn className="h-4 w-4" />
