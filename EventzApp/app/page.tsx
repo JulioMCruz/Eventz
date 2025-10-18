@@ -25,7 +25,7 @@ export default function Home() {
   }, [])
 
   useEffect(() => {
-    if (countdown === null || countdown <= 0 || !config) return
+    if (countdown === null || !config) return
 
     if (countdown === 0) {
       window.location.href = config.redirectUrl
