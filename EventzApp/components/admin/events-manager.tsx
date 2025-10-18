@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { getEvents, createEvent, updateEvent, deleteEvent, setDefaultEvent, type RedirectConfig } from "@/lib/config"
+import { uploadImage } from "@/lib/firebase-storage"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -17,12 +18,15 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { Plus, Edit, Trash2, Star, Save, X, Eye } from "lucide-react"
+import { Plus, Edit, Trash2, Star, Save, X, Eye, Upload, Image as ImageIcon } from "lucide-react"
+import Image from "next/image"
 
 export function EventsManager() {
   const [events, setEvents] = useState<RedirectConfig[]>([])
   const [editingEvent, setEditingEvent] = useState<RedirectConfig | null>(null)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [isUploading, setIsUploading] = useState(false)
+  const [imagePreview, setImagePreview] = useState<string | null>(null)
   const [formData, setFormData] = useState<Partial<RedirectConfig>>({
     name: "",
     redirectUrl: "",
@@ -39,49 +43,71 @@ export function EventsManager() {
     loadEvents()
   }, [])
 
-  const loadEvents = () => {
-    setEvents(getEvents())
+  const loadEvents = async () => {
+    const eventsData = await getEvents()
+    setEvents(eventsData)
   }
 
-  const handleCreate = () => {
+  const handleCreate = async () => {
     if (!formData.name || !formData.redirectUrl) {
       alert("Please fill in required fields")
       return
     }
 
-    createEvent(formData as Omit<RedirectConfig, "id" | "createdAt" | "updatedAt">)
-    loadEvents()
-    resetForm()
-    setIsDialogOpen(false)
+    try {
+      await createEvent(formData as Omit<RedirectConfig, "id" | "createdAt" | "updatedAt">)
+      await loadEvents()
+      resetForm()
+      setIsDialogOpen(false)
+    } catch (error) {
+      console.error("Error creating event:", error)
+      alert("Failed to create event. Please try again.")
+    }
   }
 
-  const handleUpdate = () => {
+  const handleUpdate = async () => {
     if (!editingEvent || !formData.name || !formData.redirectUrl) {
       alert("Please fill in required fields")
       return
     }
 
-    updateEvent(editingEvent.id, formData)
-    loadEvents()
-    resetForm()
-    setIsDialogOpen(false)
-  }
-
-  const handleDelete = (id: string) => {
-    if (confirm("Are you sure you want to delete this event?")) {
-      deleteEvent(id)
-      loadEvents()
+    try {
+      await updateEvent(editingEvent.id, formData)
+      await loadEvents()
+      resetForm()
+      setIsDialogOpen(false)
+    } catch (error) {
+      console.error("Error updating event:", error)
+      alert("Failed to update event. Please try again.")
     }
   }
 
-  const handleSetDefault = (id: string) => {
-    setDefaultEvent(id)
-    loadEvents()
+  const handleDelete = async (id: string) => {
+    if (confirm("Are you sure you want to delete this event?")) {
+      try {
+        await deleteEvent(id)
+        await loadEvents()
+      } catch (error) {
+        console.error("Error deleting event:", error)
+        alert("Failed to delete event. Please try again.")
+      }
+    }
+  }
+
+  const handleSetDefault = async (id: string) => {
+    try {
+      await setDefaultEvent(id)
+      await loadEvents()
+    } catch (error) {
+      console.error("Error setting default event:", error)
+      alert("Failed to set default event. Please try again.")
+    }
   }
 
   const openEditDialog = (event: RedirectConfig) => {
     setEditingEvent(event)
     setFormData(event)
+    setImagePreview(event.heroImage)
     setIsDialogOpen(true)
   }
 
@@ -89,6 +115,38 @@ export function EventsManager() {
     setEditingEvent(null)
     resetForm()
     setIsDialogOpen(true)
+  }
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    // Validate file type
+    if (!file.type.startsWith("image/")) {
+      alert("Please select an image file")
+      return
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      alert("Image size must be less than 5MB")
+      return
+    }
+
+    setIsUploading(true)
+    try {
+      // Upload to Firebase Storage
+      const imageUrl = await uploadImage(file)
+
+      // Update form data with the new image URL
+      setFormData({ ...formData, heroImage: imageUrl })
+      setImagePreview(imageUrl)
+    } catch (error) {
+      console.error("Error uploading image:", error)
+      alert("Failed to upload image. Please try again.")
+    } finally {
+      setIsUploading(false)
+    }
   }
 
   const resetForm = () => {
@@ -104,6 +162,7 @@ export function EventsManager() {
       isDefault: false,
     })
     setEditingEvent(null)
+    setImagePreview(null)
   }
 
   return (
@@ -221,13 +280,61 @@ export function EventsManager() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="heroImage">Hero Image URL</Label>
+                <Label htmlFor="heroImage">Hero Image</Label>
+
+                {/* Image Preview */}
+                {(imagePreview || formData.heroImage) && (
+                  <div className="relative w-full h-48 rounded-lg overflow-hidden border bg-muted">
+                    <Image
+                      src={imagePreview || formData.heroImage || "/professional-business-meeting.png"}
+                      alt="Hero image preview"
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                )}
+
+                {/* Upload Button */}
+                <div className="flex gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full"
+                    disabled={isUploading}
+                    onClick={() => document.getElementById("imageUpload")?.click()}
+                  >
+                    {isUploading ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary mr-2" />
+                        Uploading...
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="mr-2 h-4 w-4" />
+                        Upload Image
+                      </>
+                    )}
+                  </Button>
+                  <input
+                    id="imageUpload"
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleImageUpload}
+                  />
+                </div>
+
+                {/* Manual URL Input */}
+                <div className="text-sm text-muted-foreground">Or enter URL manually:</div>
                 <Input
                   id="heroImage"
                   type="url"
                   placeholder="/professional-business-meeting.png"
                   value={formData.heroImage}
-                  onChange={(e) => setFormData({ ...formData, heroImage: e.target.value })}
+                  onChange={(e) => {
+                    setFormData({ ...formData, heroImage: e.target.value })
+                    setImagePreview(e.target.value)
+                  }}
                 />
               </div>
 
@@ -295,12 +402,16 @@ export function EventsManager() {
                       <Star className="h-4 w-4" />
                     </Button>
                   )}
-                  <Button variant="outline" size="sm" onClick={() => openEditDialog(event)}>
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                  <Button variant="outline" size="sm" onClick={() => handleDelete(event.id)}>
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+                  {event.id !== "default" && (
+                    <>
+                      <Button variant="outline" size="sm" onClick={() => openEditDialog(event)}>
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button variant="outline" size="sm" onClick={() => handleDelete(event.id)}>
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </>
+                  )}
                 </div>
               </div>
             </CardHeader>

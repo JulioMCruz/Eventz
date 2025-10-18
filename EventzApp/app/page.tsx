@@ -12,12 +12,16 @@ export default function Home() {
   const [countdown, setCountdown] = useState<number | null>(null)
 
   useEffect(() => {
-    const loadedConfig = getDefaultEvent()
-    setConfig(loadedConfig)
+    const loadConfig = async () => {
+      const loadedConfig = await getDefaultEvent()
+      setConfig(loadedConfig)
 
-    if (loadedConfig.redirectMode === "auto") {
-      setCountdown(loadedConfig.autoRedirectDelay)
+      if (loadedConfig.redirectMode === "auto") {
+        setCountdown(loadedConfig.autoRedirectDelay)
+      }
     }
+
+    loadConfig()
   }, [])
 
   useEffect(() => {
@@ -68,7 +72,7 @@ export default function Home() {
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           {/* Left side - Image */}
           <div className="relative aspect-[4/3] rounded-2xl overflow-hidden shadow-2xl">
-            <Image src={config.heroImage || "/placeholder.svg"} alt="Hero" fill className="object-cover" priority />
+            <Image src={config.heroImage || "/placeholder.svg"} alt="Hero" fill className="object-contain" priority />
           </div>
 
           {/* Right side - Content */}
