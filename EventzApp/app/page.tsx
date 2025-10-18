@@ -68,8 +68,8 @@ export default function Home() {
         <span className="hidden sm:inline">Login</span>
       </Link>
 
-      <div className="w-full max-w-[90rem]">
-        <div className="grid lg:grid-cols-[1.2fr,1fr] gap-8 lg:gap-16 items-center">
+      <div className="w-full max-w-7xl px-4">
+        <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
           {/* Left side - Image */}
           <div className="relative aspect-[4/3] rounded-lg overflow-hidden">
             <Image src={config.heroImage || "/placeholder.svg"} alt="Hero" fill className="object-contain" priority />
@@ -77,11 +77,11 @@ export default function Home() {
 
           {/* Right side - Content */}
           <div className="space-y-6">
-            <div className="inline-block px-4 py-2 bg-primary/10 text-primary rounded-full text-base font-medium">
+            <div className="text-2xl inline-block px-4 py-2 bg-primary/10 text-primary rounded-full font-medium">
               {config.heroSlogan}
             </div>
 
-            <h1 className="text-4xl lg:text-5xl font-bold text-balance leading-tight">{config.heroTitle}</h1>
+            <h1 className="text-2xl lg:text-5xl font-bold text-balance leading-tight">{config.heroTitle}</h1>
 
             <p className="text-lg lg:text-xl text-muted-foreground text-pretty leading-relaxed">{config.heroText}</p>
 
