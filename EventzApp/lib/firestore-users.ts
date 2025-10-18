@@ -91,12 +91,16 @@ export async function createUserInFirestore(userData: {
     }
 
     const now = Timestamp.now()
-    const userDoc = {
+    const userDoc: any = {
       walletAddress: normalizedAddress,
-      email: userData.email,
       role: userData.role || "user",
       createdAt: now,
       lastLogin: now,
+    }
+
+    // Only add email if it's defined
+    if (userData.email) {
+      userDoc.email = userData.email
     }
 
     const docRef = await addDoc(collection(db, USERS_COLLECTION), userDoc)
