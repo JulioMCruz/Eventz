@@ -1,4 +1,3 @@
 {
-  "buildCommand": "cd EventzApp && npm install --legacy-peer-deps && npm run build",
   "outputDirectory": "EventzApp/.next"
 }
