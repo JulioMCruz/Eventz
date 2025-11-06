@@ -6,7 +6,17 @@
     "build": "next build",
     "dev": "next dev",
     "lint": "eslint .",
-    "start": "next start"
+    "start": "next start",
+    "switch-env": "bash scripts/switch-env.sh",
+    "switch:tdd-peru": "bash scripts/switch-env.sh tdd-peru",
+    "switch:tdd-talk": "bash scripts/switch-env.sh tdd-talk-prod",
+    "verify-env": "bash scripts/verify-env.sh",
+    "deploy": "bash scripts/deploy.sh",
+    "deploy:tdd-peru": "bash scripts/deploy.sh tdd-peru --all",
+    "deploy:tdd-talk": "bash scripts/deploy.sh tdd-talk-prod --all",
+    "deploy:rules": "bash scripts/deploy.sh",
+    "deploy:rules:tdd-peru": "bash scripts/deploy.sh tdd-peru --rules-only",
+    "deploy:rules:tdd-talk": "bash scripts/deploy.sh tdd-talk-prod --rules-only"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
